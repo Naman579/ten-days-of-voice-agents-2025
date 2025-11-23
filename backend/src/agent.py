@@ -7,6 +7,7 @@ from typing import Annotated, Literal
 from dataclasses import dataclass, field
 
 
+
 from dotenv import load_dotenv
 from pydantic import Field
 from livekit.agents import (
@@ -378,3 +379,7 @@ async def entrypoint(ctx: JobContext):
     )
 
     await ctx.connect()
+
+
+    
+    cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint, prewarm_fnc=prewarm))
