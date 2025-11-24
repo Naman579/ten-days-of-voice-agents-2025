@@ -6,11 +6,7 @@ from datetime import datetime
 from typing import Annotated, Literal, List, Optional
 from dataclasses import dataclass, field, asdict
 
-print("\n" + "🌿" * 50)
-print("🚀 WELLNESS COMPANION - TUTORIAL BY DR. ABHISHEK")
-print("📚 SUBSCRIBE: https://www.youtube.com/@drabhishek.5460/videos")
-print("💡 agent.py LOADED SUCCESSFULLY!")
-print("🌿" * 50 + "\n")
+
 
 from dotenv import load_dotenv
 from pydantic import Field
