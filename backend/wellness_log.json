@@ -1,0 +1,21 @@
+[
+    {
+        "timestamp": "2025-11-24T13:48:51.911084",
+        "mood": "good",
+        "energy": "high",
+        "objectives": [
+            "study for exams"
+        ],
+        "summary": "User is feeling good with high energy, wants to study for exams, and will try breaking down study into smaller sessions with breaks."
+    },
+    {
+        "timestamp": "2025-11-24T13:58:17.777042",
+        "mood": "good",
+        "energy": "high",
+        "objectives": [
+            "study for exam",
+            "workout"
+        ],
+        "summary": "You're feeling good with high energy, and your goals are to study for exams and work out. Remember to break down studying into smaller chunks and that even a quick workout can be beneficial."
+    }
+]
