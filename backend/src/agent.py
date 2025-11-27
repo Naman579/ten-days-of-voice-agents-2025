@@ -12,10 +12,7 @@ from datetime import datetime
 from typing import Annotated, Optional, List
 from dataclasses import dataclass, asdict
 
-print("\n" + "🛡️" * 50)
-print("🚀 BANK FRAUD AGENT BY DR ABHISHEK - INITIALIZED")
-print("📚 TASKS: Verify Identity -> Check Transaction -> Update DB")
-print("🛡️" * 50 + "\n")
+
 
 from dotenv import load_dotenv
 from pydantic import Field
