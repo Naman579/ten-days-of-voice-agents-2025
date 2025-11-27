@@ -1,0 +1,25 @@
+
+[
+    {
+        "userName": "Naman",
+        "securityIdentifier": "98523",
+        "cardEnding": "4242",
+        "transactionName": "ABC Industry",
+        "transactionAmount": "$4500.00",
+        "transactionTime": "2:30 AM EST",
+        "transactionSource": "amazon.com",
+        "case_status": "confirmed_fraud",
+        "notes": "User initially confirmed, then denied the transaction. Marked as confirmed fraud."
+    },
+    {
+        "userName": "Sarah",
+        "securityIdentifier": "99887",
+        "cardEnding": "1199",
+        "transactionName": "Unknown Crypto Exchange",
+        "transactionAmount": "$2,100.00",
+        "transactionTime": "4:15 AM PST",
+        "transactionSource": "online_transfer",
+        "case_status": "pending_review",
+        "notes": "Automated flag: Unusual location."
+    }
+]
