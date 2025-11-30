@@ -1,0 +1,38 @@
+[
+  {
+    "id": "order-de9ce957",
+    "items": [
+      {
+        "product_id": "hoodie-001",
+        "name": "Cozy Hoodie",
+        "unit_price": 1499,
+        "quantity": 1,
+        "line_total": 1499,
+        "attrs": {
+          "size": "S"
+        }
+      },
+      {
+        "product_id": "hoodie-001",
+        "name": "Cozy Hoodie",
+        "unit_price": 1499,
+        "quantity": 2,
+        "line_total": 2998,
+        "attrs": {
+          "size": "M"
+        }
+      },
+      {
+        "product_id": "mug-002",
+        "name": "Insulated Travel Mug",
+        "unit_price": 599,
+        "quantity": 2,
+        "line_total": 1198,
+        "attrs": {}
+      }
+    ],
+    "total": 5695,
+    "currency": "INR",
+    "created_at": "2025-11-30T01:27:30.003190Z"
+  }
+]
