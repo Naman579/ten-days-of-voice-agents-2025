@@ -1,4 +1,18 @@
+# ======================================================
+# 🎤 VOICE IMPROVE TUTOR BY NAMAN
+# 🚀 Communication AI using LiveKit
+# ======================================================
+
 import logging
+import json
+import os
+from datetime import datetime
+from dataclasses import dataclass, field, asdict
+
+print("\n" + "🎤" * 50)
+print("🚀 VOICE IMPROVE TUTOR - BY NAMAN")
+print("💬 Practice English | Improve Communication | Speak Confidently")
+print("🎤" * 50 + "\n")
 
 from dotenv import load_dotenv
 from livekit.agents import (
@@ -6,134 +20,160 @@ from livekit.agents import (
     AgentSession,
     JobContext,
     JobProcess,
-    MetricsCollectedEvent,
     RoomInputOptions,
     WorkerOptions,
     cli,
-    metrics,
-    tokenize,
-    # function_tool,
-    # RunContext
 )
+
 from livekit.plugins import murf, silero, google, deepgram, noise_cancellation
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 logger = logging.getLogger("agent")
-
 load_dotenv(".env.local")
 
+# ======================================================
+# 🧠 SESSION DATA
+# ======================================================
 
-class Assistant(Agent):
-    def __init__(self) -> None:
+@dataclass
+class SessionData:
+    conversation_history: list[str] = field(default_factory=list)
+    session_start: datetime = field(default_factory=datetime.now)
+
+# ======================================================
+# 💾 SIMPLE HISTORY (OPTIONAL)
+# ======================================================
+
+LOG_FILE = "conversation_log.json"
+
+def get_log_path():
+    base_dir = os.path.dirname(__file__)
+    backend_dir = os.path.abspath(os.path.join(base_dir, ".."))
+    return os.path.join(backend_dir, LOG_FILE)
+
+def load_history():
+    path = get_log_path()
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path, "r") as f:
+            return json.load(f)
+    except:
+        return []
+
+def save_message(message):
+    path = get_log_path()
+    history = load_history()
+    history.append({
+        "time": datetime.now().isoformat(),
+        "message": message
+    })
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(history, f, indent=2)
+
+# ======================================================
+# 🧠 COMMUNICATION TUTOR AGENT
+# ======================================================
+
+class CommunicationTutorAgent(Agent):
+    def __init__(self, history_context: str):
         super().__init__(
-            instructions="""You are a helpful voice AI assistant. The user is interacting with you via voice, even if you perceive the conversation as text.
-            You eagerly assist users with their questions by providing information from your extensive knowledge.
-            Your responses are concise, to the point, and without any complex formatting including emojis, asterisks, or other weird symbols.
-            You are curious, friendly, and have a sense of humor.""",
+            instructions=f"""
+            You are an intelligent, friendly, and engaging **English Communication Tutor**.
+
+            🎤 Your name is: **Voice Improve Tutor by Naman**
+
+            🧠 PREVIOUS CONTEXT:
+            {history_context}
+
+            🎯 YOUR ROLE:
+            - Talk with the user on ANY topic (life, tech, movies, study, etc.)
+            - Help improve their English speaking skills
+            - Keep conversation natural and engaging
+
+            💬 HOW TO RESPOND:
+            1. Always reply like a human (not robotic)
+            2. Ask follow-up questions
+            3. Encourage long answers
+
+            ✨ CORRECTION STYLE:
+            If user makes a mistake:
+            - First respond normally
+            - Then gently correct
+
+            Example:
+            User: "I go market yesterday"
+            You:
+            "Nice! A better way to say it is: 'I went to the market yesterday.'"
+
+            🎯 ALSO:
+            - Suggest better vocabulary sometimes
+            - Improve sentence structure
+            - Help build confidence
+
+            🔥 KEEP IT FUN:
+            - Be friendly 😄
+            - Be supportive 🤝
+            - Be conversational 🎤
+
+            🚫 DO NOT:
+            - Give long lectures
+            - Be strict or boring
+
+            👉 Start by greeting the user and asking an interesting question.
+            """,
+            tools=[],
         )
 
-    # To add tools, use the @function_tool decorator.
-    # Here's an example that adds a simple weather tool.
-    # You also have to add `from livekit.agents import function_tool, RunContext` to the top of this file
-    # @function_tool
-    # async def lookup_weather(self, context: RunContext, location: str):
-    #     """Use this tool to look up current weather information in the given location.
-    #
-    #     If the location is not supported by the weather service, the tool will indicate this. You must tell the user the location's weather is unavailable.
-    #
-    #     Args:
-    #         location: The location to look up weather information for (e.g. city name)
-    #     """
-    #
-    #     logger.info(f"Looking up weather for {location}")
-    #
-    #     return "sunny with a temperature of 70 degrees."
-
+# ======================================================
+# 🎬 ENTRYPOINT
+# ======================================================
 
 def prewarm(proc: JobProcess):
     proc.userdata["vad"] = silero.VAD.load()
 
-
 async def entrypoint(ctx: JobContext):
-    # Logging setup
-    # Add any other context you want in all log entries here
-    ctx.log_context_fields = {
-        "room": ctx.room.name,
-    }
+    print("\n🎬 Starting Voice Improve Session...\n")
 
-    # Set up a voice AI pipeline using OpenAI, Cartesia, AssemblyAI, and the LiveKit turn detector
+    # Load previous history (optional)
+    history = load_history()
+    history_summary = "No previous conversations."
+
+    if history:
+        history_summary = f"User has {len(history)} previous interactions."
+
     session = AgentSession(
-        # Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
-        # See all available models at https://docs.livekit.io/agents/models/stt/
         stt=deepgram.STT(model="nova-3"),
-        # A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
-        # See all available models at https://docs.livekit.io/agents/models/llm/
-        llm=google.LLM(
-                model="gemini-2.5-flash",
-            ),
-        # Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
-        # See all available models as well as voice selections at https://docs.livekit.io/agents/models/tts/
+        llm=google.LLM(model="gemini-2.5-flash"),
         tts=murf.TTS(
-                voice="en-US-matthew", 
-                style="Conversation",
-                tokenizer=tokenize.basic.SentenceTokenizer(min_sentence_len=2),
-                text_pacing=True
-            ),
-        # VAD and turn detection are used to determine when the user is speaking and when the agent should respond
-        # See more at https://docs.livekit.io/agents/build/turns
+            voice="en-US-natalie",
+            style="Conversational",
+            text_pacing=True,
+        ),
         turn_detection=MultilingualModel(),
         vad=ctx.proc.userdata["vad"],
-        # allow the LLM to generate a response while waiting for the end of turn
-        # See more at https://docs.livekit.io/agents/build/audio/#preemptive-generation
-        preemptive_generation=True,
+        userdata=SessionData(),
     )
 
-    # To use a realtime model instead of a voice pipeline, use the following session setup instead.
-    # (Note: This is for the OpenAI Realtime API. For other providers, see https://docs.livekit.io/agents/models/realtime/))
-    # 1. Install livekit-agents[openai]
-    # 2. Set OPENAI_API_KEY in .env.local
-    # 3. Add `from livekit.plugins import openai` to the top of this file
-    # 4. Use the following session setup instead of the version above
-    # session = AgentSession(
-    #     llm=openai.realtime.RealtimeModel(voice="marin")
-    # )
-
-    # Metrics collection, to measure pipeline performance
-    # For more information, see https://docs.livekit.io/agents/build/metrics/
-    usage_collector = metrics.UsageCollector()
-
-    @session.on("metrics_collected")
-    def _on_metrics_collected(ev: MetricsCollectedEvent):
-        metrics.log_metrics(ev.metrics)
-        usage_collector.collect(ev.metrics)
-
-    async def log_usage():
-        summary = usage_collector.get_summary()
-        logger.info(f"Usage: {summary}")
-
-    ctx.add_shutdown_callback(log_usage)
-
-    # # Add a virtual avatar to the session, if desired
-    # # For other providers, see https://docs.livekit.io/agents/models/avatar/
-    # avatar = hedra.AvatarSession(
-    #   avatar_id="...",  # See https://docs.livekit.io/agents/models/avatar/plugins/hedra
-    # )
-    # # Start the avatar and wait for it to join
-    # await avatar.start(session, room=ctx.room)
-
-    # Start the session, which initializes the voice pipeline and warms up the models
     await session.start(
-        agent=Assistant(),
+        agent=CommunicationTutorAgent(history_context=history_summary),
         room=ctx.room,
         room_input_options=RoomInputOptions(
-            # For telephony applications, use `BVCTelephony` for best results
-            noise_cancellation=noise_cancellation.BVC(),
+            noise_cancellation=noise_cancellation.BVC()
         ),
     )
 
-    # Join the room and connect to the user
     await ctx.connect()
 
+# ======================================================
+# 🚀 RUN APP
+# ======================================================
 
 if __name__ == "__main__":
-    cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint, prewarm_fnc=prewarm))
+    cli.run_app(
+        WorkerOptions(
+            entrypoint_fnc=entrypoint,
+            prewarm_fnc=prewarm
+        )
+    )
